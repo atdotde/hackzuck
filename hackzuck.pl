@@ -23,27 +23,27 @@ $teamA->border('|', '|', '−', '−', '+', '+', '+', '+');
 my $punkteA = 0;
 &updateA;
 
-
 my$teamB = newwin(3, 15, 20, COLS() - 20);
 my $punkteB = 0;
 &updateB;
 
-my $center = newwin(3, 30, LINES() / 2, COLS() / 2 - 15);
+my $center = newwin(5, 40, LINES() / 2, COLS() / 2 - 20);
+#$center->attron(A_REVERSE);
 
-
+my $begriff = "JEOPARDY";
 
 my $t = 15;
-$timer->addstring(0,0,"Time: $t\n");
+$timer->addstring(0,0,"Time: $t    ");
 $timer->refresh;
 
 refresh;
 
-$SIG{ALRM} = sub {--$t; $timer->addstring(0,0,"Time: $t\n"); $timer->refresh; Time::HiRes::alarm(1);};
+$SIG{ALRM} = sub {--$t; $timer->addstring(0,0,"Time: $t  "); $timer->refresh; Time::HiRes::alarm(1);};
 
 Time::HiRes::alarm(1);
 
-$center->addstring(1, 1, "BEGRIFF");
-$center->refresh;
+$center->border('|', '|', '-', '-', '+', '+', '+', '+');
+&alert($begriff);
 
 while (1) {
   my $c = getch();
@@ -55,12 +55,18 @@ while (1) {
     &updateB;
   } elsif ($c eq ' ') {
     Time::HiRes::alarm(0);
-    $center->addstring(1, 1, "HORN");
-    $center->refresh;
+    alert("HORN");
   } elsif ($c eq 'q') {
     exit;
   } elsif ($c eq 'r') {
+    $center->clear;
+    $center->border('|', '|', '-', '-', '+', '+', '+', '+');
+    &alert($begriff);
+    $center->refresh;
     $t = 15;
+    $timer->addstring(0,0,"Time: $t    ");
+    Time::HiRes::alarm(1);
+
     $punkteA = 0;
     $punkteB = 0;
     &updateA;
@@ -69,8 +75,7 @@ while (1) {
   }
   if ($t <= 0) {
     Time::HiRes::alarm(0);
-    $center->addstring(1, 1, "STOP");
-    $center->refresh;
+    &alert("STOP");
   }
 }
 
@@ -84,4 +89,11 @@ sub updateA {
 sub updateB {
   $teamB->addstring(1,1,"Team B: $punkteB  ");
   $teamB->refresh;
+}
+
+sub alert {
+  my $msg = shift;
+  my $pad = ' ' x ((37 - length($msg))/2);
+  $center->addstring(2,2, $pad . $msg . $pad);
+  $center->refresh;
 }
